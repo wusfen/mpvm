@@ -1,16 +1,6 @@
 <view>
 model: {{model}}
+</view><view>
+upper: {{upper}}
 </view>
-<view>
-obj.key: {{obj.key}}
-</view>
-<view />
-computed.total: {{total}}
-<view />
-==
-<view>
-  <view wx:for="{{arr}}">
-    {{item.name}}
-    <button bind:tap="click" data-arg="{{item}}">button</button>
-  </view>
-</view>
+<button bind:tap="change" data-arg="{{'my world'}}">button</button>

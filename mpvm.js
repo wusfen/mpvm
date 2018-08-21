@@ -1,12 +1,16 @@
 Page.vm = function (options) {
   // data -> vm
   var data = options.data || {}
-  Object.assign(data, Object.assign({},
-    options, // page event handlers
+  Object.assign(data,
     options.computed,
-    options.methods,
-    options.data // data
-  ))
+    options.methods
+  )
+  // page event handlers
+  var _data = Object.assign({}, options)
+  delete _data.data
+  delete _data.computed
+  delete _data.methods
+  Object.assign(data, _data)
 
   // inject
   for (var key in data) {
@@ -19,7 +23,7 @@ Page.vm = function (options) {
   }
 
   // onLoad
-  options.onLoad = function(){
+  options.onLoad = function () {
     // route
     data.route = this.route
     // mounted
@@ -52,15 +56,15 @@ function injectFunction(vm, fn) {
 
     // newData
     var newData = {}
-    for(var key in vm){
-      !function(value){
-        if(typeof value == 'function'){ // computed
+    for (var key in vm) {
+      !function (value) {
+        if (typeof value == 'function') { // computed
           var fun = value.fn || value
-          if(!fun.toString().match('return')){
+          if (!fun.toString().match('return')) {
             return
           }
         }
-        if(value === undefined){ // fix setData undefined
+        if (value === undefined) { // fix setData undefined
           value = ''
         }
         newData[key] = value

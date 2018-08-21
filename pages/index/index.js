@@ -1,32 +1,18 @@
 var vm = new Page.vm({
   data: {
-    model: 'vmm',
-    obj: {
-      key: 'value',
-    },
-    arr: [
-      { id: 11, name: 'n1' },
-      { id: 2222, name: 'n2' }
-    ],
-    data: 'ov:data'
+    model: 'mpvm'
   },
   computed:{
-    total: function () {
-      return this.model+': '+String(vm.model).length
-      return Math.random()
-    },
+    upper: function () {
+      return this.model.toUpperCase()
+    }
   },
   methods: {
-    fun: function (e) {
-      vm.model = e
-      vm.obj.key = 'funk'
-    },
-    click: function (e) {
-      vm.fun(e)
-      console.log(vm)
-    },
+    change: function (name) {
+      this.model = 'hello ' + (name || 'world')
+    }
   },
   mounted: function () {
-    vm.model = vm.route
+    vm.change()
   }
 })
