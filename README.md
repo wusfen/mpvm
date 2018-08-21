@@ -49,7 +49,8 @@ var vm = Page.vm({
 本框架做了个语法糖，如果存在`data-arg`时，其值将做为事件处理函数的第一个参数
 
 ```html
-<button bind:tap="change" data-arg="{{'my world'}}">change</button>
+{{model}} -> {{upper}}
+<button bind:tap="change" data-arg="{{'my world'}}">button</button>
 ```
 
 需要注意的是：
