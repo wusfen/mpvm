@@ -31,7 +31,7 @@ var vm = Page.vm({
   // 方法
   methods: {
     change: function(name){
-      this.model = 'hello ' + name || 'world'
+      this.model = 'hello ' + (name || 'world')
     }
   },
   // onLoad
