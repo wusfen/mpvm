@@ -1,17 +1,14 @@
-{{model}}
+<view>
+model: {{model}}
+</view>
+<view>
+obj.key: {{obj.key}}
+</view>
 <view />
-{{obj.key}}
+computed.total: {{total}}
 <view />
-{{arr[0]}}
-<view />
-computed: {{computed}}
-<view />
-==
-
-<button id="{{obj.key}}" bind:tap="click">it</button>
 ==
 <view>
-
   <view wx:for="{{arr}}">
     {{item}}
     {{item.name}}

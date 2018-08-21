@@ -1,75 +1,81 @@
-Page.vm = Page.data = function (data) {
-  var options = {
-    data: data
-  }
-
-  // methods, computed
-  for (var key in data) {
-    !function (value) {
-      if (typeOf(value) == 'function') {
-        options[key] = data[key] = injectFunction(value, data)
-      }
-    }(data[key])
-  }
-
-  // toJSON
-  injectObject(data)
-
-  // Page
-  Page(options)
-  Page.$data = data
-
+Page.vm = function (options) {
   // vm
-  return data
+  var vm = {}
+  Object.assign(vm, options)
+  Object.assign(vm, options.data)
+  Object.assign(vm, options.computed)
+  Object.assign(vm, options.methods)
+
+  // inject
+  for (var key in vm) {
+    !function (fn) {
+      if (typeof fn == 'function') {
+        vm[key] = injectFunction(vm, fn)
+      }
+    }(vm[key])
+  }
+
+  // alias
+  vm.onLoad = vm.mounted
+
+  // Page init
+  Page(vm)
+  Page.vm = vm
+  return vm
 }
 
 function typeOf(value) {
   return Object.prototype.toString.call(value).slice(8, -1).toLowerCase()
 }
 
-// bind this, render, computed, id="value"
-function injectFunction(fn, data) {
+// bind this, render, computed, e.id
+function injectFunction(vm, fn) {
   var $fn = function (e) {
     // e.id
     if (e && e.target && e.target.id) {
-      var idData = JSON.parse(e.target.id)
-      e.id = idData
-      Object.assign(e, idData)
+      var id = e.target.id
+      e.id = isNaN(id) ? id : +id
     }
 
     // handler
-    var rs = fn.apply(data, arguments)
-    injectObject(data)
+    var rs = fn.apply(vm, arguments)
 
-    // render
+    // newData
     var fnCode = fn.toString()
     var newData = {}
-    for (var key in data) {
-      var value = data[key]
-      // !!return: computed
-      if (typeOf(value) == 'function' && value.toString().match('return')) {
-        fnCode += value.fn || value
+    for (var key in vm) {
+      var value = vm[key]
+      // !return: !computed
+      if (typeOf(value) == 'function') {
+        var fun = value.fn || value
+        if (fun.toString().match('return')) {
+          fnCode += fun
+        }
       }
     }
-    for (var key in data) {
-      if(fnCode.match(key)){
-        newData[key] = data[key]
+    for (var key in vm) {
+      if (fnCode.match(key)) {
+        newData[key] = vm[key]
       }
     }
-    this.setData(newData)
 
-    // old
-    $fn.fn = fn
+    // update view
+    this.setData(newData)
 
     // result
     return rs
   }
+
   // coumputed
   if (fn.toString().match('return')) {
     $fn.toJSON = $fn.toString = $fn.valueOf = function () {
-      return fn.apply(data, arguments)
+      return fn.apply(vm, arguments)
     }
   }
+
+  // old
+  $fn.fn = fn
+
   return $fn
 }
 

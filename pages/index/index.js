@@ -1,41 +1,29 @@
 var vm = new Page.vm({
-  model: 'vmm',
-  obj: {
-    key: 'value',
+  data: {
+    model: 'vmm',
+    obj: {
+      key: 'value',
+    },
+    arr: [
+      { id: 11, name: 'n1' },
+      { id: 2222, name: 'n2' }
+    ],
   },
-  arr: [
-    { id: 11, name: 'n1' },
-    { id: 22, name: 'n2' }
-  ],
-  computed: function () {
-    return 'cp:' + Math.random()
+  computed:{
+    total: function () {
+      return vm.model+': '+String(vm.model).length
+    },
   },
-  fun: function (e) {
-    console.log(e)
-    vm.model = 'fun'
-    vm.obj.key = 'funk'
+  methods: {
+    fun: function (e) {
+      vm.model = 'fun'
+      vm.obj.key = 'funk'
+    },
+    click: function (e) {
+      vm.model = e.target.id
+    },
   },
-  click: function (item) {
-    console.log(item)
-    vm.model = item.id
-  },
-  onLoad: function () {
+  mounted: function () {
     vm.model = 'onLoad'
   }
 })
-
-// Page({
-//   data: {
-//     model: 'vmm',
-//     obj: {
-//       key: 'value',
-//     },
-//     arr: [
-//       { id: 11, name: 'n1' },
-//       { id: 22, name: 'n2' }
-//     ],
-//   },
-//   click: function(e){
-//     console.log(e)
-//   }
-// })
