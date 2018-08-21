@@ -10,8 +10,7 @@ computed.total: {{total}}
 ==
 <view>
   <view wx:for="{{arr}}">
-    {{item}}
     {{item.name}}
-    <button id="{{item.id}}" bind:tap="click">button</button>
+    <button bind:tap="click" data-arg="{{item}}">button</button>
   </view>
 </view>

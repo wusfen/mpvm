@@ -1,66 +1,78 @@
 Page.vm = function (options) {
-  // vm
-  var vm = {}
-  Object.assign(vm, options)
-  Object.assign(vm, options.data)
-  Object.assign(vm, options.computed)
-  Object.assign(vm, options.methods)
+  // data -> vm
+  var data = options.data || {}
+  Object.assign(data, Object.assign({},
+    options, // page event handlers
+    options.computed,
+    options.methods,
+    options.data // data
+  ))
 
   // inject
-  for (var key in vm) {
+  for (var key in data) {
     !function (fn) {
       if (typeof fn == 'function') {
-        vm[key] = injectFunction(vm, fn)
+        data[key] = injectFunction(data, fn)
+        options[key] = data[key]
       }
-    }(vm[key])
+    }(data[key])
   }
 
-  // alias
-  vm.onLoad = vm.mounted
+  // onLoad
+  options.onLoad = function(){
+    // route
+    data.route = this.route
+    // mounted
+    options.mounted && options.mounted.apply(this, arguments)
+  }
 
   // Page init
-  Page(vm)
-  Page.vm = vm
-  return vm
+  Page(options)
+  Page.data = data
+
+  return data
 }
 
-function typeOf(value) {
-  return Object.prototype.toString.call(value).slice(8, -1).toLowerCase()
-}
-
-// bind this, render, computed, e.id
+// bind this, render, computed, e->arg
 function injectFunction(vm, fn) {
   var $fn = function (e) {
-    // e.id
-    if (e && e.target && e.target.id) {
-      var id = e.target.id
-      e.id = isNaN(id) ? id : +id
+    var args = arguments
+
+    // data-arg="value" -> handler(value)
+    var target = e && e.target
+    if (target) {
+      var dataset = target.dataset
+      if (dataset.arg) {
+        args = [dataset.arg]
+      }
     }
 
     // handler
-    var rs = fn.apply(vm, arguments)
+    var rs = fn.apply(vm, args)
 
     // newData
-    var fnCode = fn.toString()
     var newData = {}
-    for (var key in vm) {
-      var value = vm[key]
-      // !return: !computed
-      if (typeOf(value) == 'function') {
-        var fun = value.fn || value
-        if (fun.toString().match('return')) {
-          fnCode += fun
+    for(var key in vm){
+      !function(value){
+        if(typeof value == 'function'){ // computed
+          var fun = value.fn || value
+          if(!fun.toString().match('return')){
+            return
+          }
         }
-      }
-    }
-    for (var key in vm) {
-      if (fnCode.match(key)) {
-        newData[key] = vm[key]
-      }
+        if(value === undefined){ // fix setData undefined
+          value = ''
+        }
+        newData[key] = value
+      }(vm[key])
     }
 
     // update view
-    this.setData(newData)
+    // event trigger -> method1(){ vm.method2() }
+    // !vm.setData
+    if (this.setData) {
+      this.setData(newData)
+    }
 
     // result
     return rs
@@ -77,30 +89,4 @@ function injectFunction(vm, fn) {
   $fn.fn = fn
 
   return $fn
-}
-
-// xxx: !{{obj.value}}
-// toJSON
-function injectObject(obj, count) {
-  // xxx: !{{obj.value}}
-  return
-
-
-  if (count > 1000) return
-  if (typeOf(obj) == 'object' && !obj.toJSON && count > 0) { // count>0: !!__webviewId__
-    obj.toJSON = function () {
-      var toJSON = this.toJSON
-      delete this.toJSON
-      var json = JSON.stringify(obj)
-      this.toJSON = toJSON
-      return json
-    }
-  }
-
-  if (typeOf(obj) == 'object' || typeOf(obj) == 'array') {
-    for (var key in obj) {
-      injectObject(obj[key], (count || 0) + 1)
-    }
-  }
-
 }
