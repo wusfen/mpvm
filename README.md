@@ -60,3 +60,17 @@ var vm = Page.vm({
 
 但是你可以通过对象的唯一字段再去查找
 
+## 使用方法
+
+1. 在入口文件`app.js`中引入`mpvm.js`
+```javascript
+require('./mpvm.js')
+```
+2. 在具体页面的js中直接使用即可
+```javascript
+Page.vm(options)
+```
+
+
+
+
