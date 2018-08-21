@@ -1,7 +1,8 @@
 var vm = Page.vm({
   // 数据
   data: {
-    model: 'mpvm.js'
+    model: 'mpvm.js',
+    data: ''
   },
   // 计算属性
   computed: {

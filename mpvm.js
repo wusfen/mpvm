@@ -23,9 +23,20 @@ Page.vm = function (options) {
   }
 
   // onLoad
+  options.mounted = options.mounted || options.onLoad
   options.onLoad = function () {
-    // route
-    data.route = this.route
+    var self = this
+    // $page
+    data.$page = this
+    // setData
+    // data.setData = function(){
+    //   self.setData.apply(self, arguments)
+    // }
+    data.$foceUpdate = function(){
+      // todo
+    }
+    // $route
+    data.$route = this.route
     // mounted
     options.mounted && options.mounted.apply(this, arguments)
   }
@@ -70,6 +81,9 @@ function injectFunction(vm, fn) {
         newData[key] = value
       }(vm[key])
     }
+
+    // protected
+    delete newData.$page
 
     // update view
     // event trigger -> method1(){ vm.method2() }
