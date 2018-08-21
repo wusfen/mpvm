@@ -29,11 +29,12 @@ Page.vm = function (options) {
     // $page
     data.$page = this
     // setData
-    // data.setData = function(){
-    //   self.setData.apply(self, arguments)
-    // }
-    data.$foceUpdate = function(){
-      // todo
+    data.setData = function () {
+      self.setData.apply(self, arguments)
+    }
+    // $foceUpdate
+    data.$foceUpdate = function () {
+      foceUpdate(data)
     }
     // $route
     data.$route = this.route
@@ -65,32 +66,8 @@ function injectFunction(vm, fn) {
     // handler
     var rs = fn.apply(vm, args)
 
-    // newData
-    var newData = {}
-    for (var key in vm) {
-      !function (value) {
-        if (typeof value == 'function') { // computed
-          var fun = value.fn || value
-          if (!fun.toString().match('return')) {
-            return
-          }
-        }
-        if (value === undefined) { // fix setData undefined
-          value = ''
-        }
-        newData[key] = value
-      }(vm[key])
-    }
-
-    // protected
-    delete newData.$page
-
     // update view
-    // event trigger -> method1(){ vm.method2() }
-    // !vm.setData
-    if (this.setData) {
-      this.setData(newData)
-    }
+    foceUpdate(vm)
 
     // result
     return rs
@@ -107,4 +84,29 @@ function injectFunction(vm, fn) {
   $fn.fn = fn
 
   return $fn
+}
+
+function foceUpdate(vm) {
+  // newData
+  var newData = {}
+  for (var key in vm) {
+    !function (value) {
+      if (typeof value == 'function') { // computed
+        var fun = value.fn || value
+        if (!fun.toString().match('return')) {
+          return
+        }
+      }
+      if (value === undefined) { // fix setData undefined
+        value = ''
+      }
+      newData[key] = value
+    }(vm[key])
+  }
+
+  // protected
+  delete newData.$page
+
+  // update view
+  vm.setData(newData)
 }
