@@ -1,0 +1,8 @@
+page{
+  box-sizing: border-box
+}
+
+page{
+  padding: .5em;
+  max-width: 100%;
+}

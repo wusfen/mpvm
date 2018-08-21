@@ -10,7 +10,7 @@
 
 在方法内修改数据时，直接通过`this`修改即可，取代了`this.setData`
 
-`Page.vm`返回`this`，可以在方法内使用接受返回的变量名（如`vm`）代替`this`
+`Page.vm()`返回`this`，可以在方法内使用接受返回的变量名（如`vm`）代替`this`
 
 `mounted`映射为`onLoad`
 
@@ -50,7 +50,7 @@ var vm = Page.vm({
 
 ```html
 {{model}} -> {{upper}}
-<button bind:tap="change" data-arg="{{'my world'}}">button</button>
+<button bind:tap="change" data-arg="{{'my world'}}">change</button>
 ```
 
 需要注意的是：
