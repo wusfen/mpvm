@@ -6,15 +6,15 @@
 
 ## 逻辑层
 
-计算属性和方法等函数内的`this`是`data``computed``methods`的集合，可以通过`this`直接访问其成员
+成员函数内的`this`指向`data`作为`vm`, 并且`computed` `methods`的成员也通过`this`访问
 
-在方法内修改数据时，直接通过`this`修改即可，取代了`this.setData`
+在成员函数内，直接通过`this`修改数据即可，无须`this.setData`，框架会自动更新视图
 
-`Page.vm()`返回`this`，可以在方法内使用接受返回的变量名（如`vm`）代替`this`
+`Page.vm()`返回`this`，可以在成员函数内使用变量名（如`vm`）代替`this`
 
 `mounted`映射为`onLoad`
 
-修复小程序原生不能把数据改成`undefined`的缺陷
+解决了小程序原生不能把数据改成`undefined`的缺陷
 
 ```javascript
 var vm = Page.vm({
