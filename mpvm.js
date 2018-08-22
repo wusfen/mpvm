@@ -76,7 +76,7 @@ VM.inject = function (vm, fn) {
   }
 
   // computed
-  $fn.toJSON = function () {
+  $fn.toJSON = $fn.toString = $fn.valueOf= function () {
     // 避免 toJSON->$render->setData->toJSON 死循环
     vm.__isToJSON__ = true
     return fn.call(vm)

@@ -11,7 +11,7 @@ var vm = Page.vm({
   // 计算属性
   computed: {
     upper: function () {
-      return this.model.toUpperCase()
+      return vm.model.toUpperCase()
     }
   },
   // 方法
