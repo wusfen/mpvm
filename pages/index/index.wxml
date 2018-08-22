@@ -1,2 +1,3 @@
 {{model}} | {{upper}}
 <button bind:tap="change" data-arg="{{'my world'}}">change</button>
+{{obj.sub.key}}

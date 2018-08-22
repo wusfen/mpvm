@@ -2,7 +2,11 @@ var vm = Page.vm({
   // 数据
   data: {
     model: 'mpvm.js',
-    data: ''
+    obj:{
+      sub:{
+        key: 'sub value'
+      }
+    }
   },
   // 计算属性
   computed: {
@@ -18,6 +22,11 @@ var vm = Page.vm({
   },
   // onLoad
   mounted: function () {
-    vm.change()
+    this.change('world')
+    this.obj.sub.key = 'new sub'
   }
 })
+
+setTimeout(function(){
+  vm.obj.sub.key = 'st'
+},2000)
