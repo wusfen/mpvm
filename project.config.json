@@ -13,7 +13,6 @@
 	"compileType": "miniprogram",
 	"libVersion": "2.0.4",
 	"appid": "wx72a642ca288af668",
-	"projectname": "%E5%B0%8F%E7%A8%8B%E5%BA%8Fvm%E6%8F%92%E4%BB%B6",
 	"isGameTourist": false,
 	"condition": {
 		"search": {
@@ -24,13 +23,30 @@
 			"current": -1,
 			"list": []
 		},
+		"plugin": {
+			"current": -1,
+			"list": []
+		},
 		"game": {
 			"currentL": -1,
 			"list": []
 		},
 		"miniprogram": {
-			"current": -1,
-			"list": []
+			"current": 1,
+			"list": [
+				{
+					"id": -1,
+					"name": "logs",
+					"pathName": "pages/logs/logs",
+					"query": ""
+				},
+				{
+					"id": 1,
+					"name": "try",
+					"pathName": "pages/try/index",
+					"query": ""
+				}
+			]
 		}
 	}
 }
