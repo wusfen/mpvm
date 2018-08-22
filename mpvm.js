@@ -14,19 +14,12 @@ function VM(options) {
 
   // methods
   for (var key in data) {
-    if(!data.hasOwnProperty(key)) continue
+    if (!data.hasOwnProperty(key)) continue
     !function (fn) {
       if (typeof fn == 'function') {
         // bind proxy
         var $fn = VM.inject(proxy, fn)
         options[key] = data[key] = $fn
-        // computed
-        // computed不能绑定proxy，里面取值proxy会散发setData，然后又触发toJSON，造成死循环
-        if(fn.toString().match('return')){
-          $fn.toJSON = $fn.toString = $fn.valueOf = function () {
-            return fn.call(data)
-          }
-        }
       }
     }(data[key])
   }
@@ -82,6 +75,13 @@ VM.inject = function (vm, fn) {
     return fn.apply(vm, args)
   }
 
+  // computed
+  $fn.toJSON = function () {
+    // 避免 toJSON->$render->setData->toJSON 死循环
+    vm.__isToJSON__ = true
+    return fn.call(vm)
+  }
+
   // old
   $fn.fn = fn
 
@@ -108,7 +108,7 @@ VM.prototype = {
     $page.setData.apply($page, arguments)
   },
   $foceUpdate: function () {
-    console.log('fu')
+    console.log('$foceUpdate')
     var vm = this
     // newData
     var newData = {}
@@ -134,6 +134,13 @@ VM.prototype = {
     vm.setData(newData)
   },
   $render: function () {
+    if (this.__isToJSON__) {
+      setTimeout(function () {
+        this.__isToJSON__ = false
+      }.bind(this), 1)
+      return
+    }
+
     var self = this
     clearTimeout(this.__timer__)
     this.__timer__ = setTimeout(function () {
