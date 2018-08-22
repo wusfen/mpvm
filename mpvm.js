@@ -33,7 +33,9 @@ function VM(options) {
     // $route
     data.$route = this.route
     // mounted
-    options.mounted && options.mounted()
+    setTimeout(function(){
+      options.mounted && options.mounted()
+    }, 1)
   }
 
   // init
@@ -76,10 +78,12 @@ VM.inject = function (vm, fn) {
   }
 
   // computed
-  $fn.toJSON = $fn.toString = $fn.valueOf= function () {
-    // 避免 toJSON->$render->setData->toJSON 死循环
-    vm.__isToJSON__ = true
-    return fn.call(vm)
+  if(fn.toString().match('return')){
+    $fn.toJSON = $fn.toString = $fn.valueOf = function () {
+      // 避免 toJSON->$render->setData->toJSON 死循环
+      vm.__isToJSON__ = true
+      return fn.call(vm)
+    }
   }
 
   // old

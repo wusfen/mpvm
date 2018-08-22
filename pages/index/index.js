@@ -24,9 +24,10 @@ var vm = Page.vm({
   mounted: function () {
     this.change('world')
     this.obj.sub.key = 'new sub'
+    console.log('mounted')
   }
 })
 
-setTimeout(function(){
-  vm.obj.sub.key = 'st'
-},2000)
+// setTimeout(function(){
+//   vm.obj.sub.key = 'setTimeout'
+// },2000)
