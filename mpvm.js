@@ -111,22 +111,3 @@ function foceUpdate(vm) {
   // update view
   vm.setData(newData)
 }
-
-// proxy
-function getProxy(data){
-  return new Proxy(vm, {
-    set: function (vm, key, value) {
-      vm[key] = value
-      setTimeout(function(){
-        vm.$foceUpdate()
-      }, 1)
-      return true
-    },
-    get: function (vm, key) {
-      setTimeout(function () {
-        vm.$foceUpdate()
-      }, 1)
-      return vm[key]
-    }
-  })
-}
