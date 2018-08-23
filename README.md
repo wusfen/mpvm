@@ -6,16 +6,6 @@
 
 ## 逻辑层
 
-成员函数内的`this`指向`data`作为`vm`, 并且`computed` `methods`的成员也通过`this`访问
-
-在成员函数内，直接通过`this`修改数据即可，无须`this.setData`，框架会自动更新视图
-
-`Page.vm()`返回`this`，可以在成员函数内使用变量名（如`vm`）代替`this`
-
-`mounted`映射为`onLoad`
-
-解决了小程序原生不能把数据改成`undefined`的缺陷
-
 ```javascript
 var vm = Page.vm({
   // 数据
@@ -41,33 +31,44 @@ var vm = Page.vm({
 })
 ```
 
+成员函数内的`this`指向`data`作为`vm`, 并且`computed` `methods`的成员也通过`this`访问
+
+在成员函数内，直接通过`this`修改数据即可，无须`this.setData`，框架会自动更新视图
+
+`Page.vm()`返回`this`，可以在成员函数内使用变量名（如`vm`）代替`this`
+
+`mounted`映射为`onLoad`
+
+解决了小程序原生不能把数据改成`undefined`的缺陷
+
 ## 视图层
 因为框架比较轻量，视图层没有多大变化
+
+```html
+{{model}} | {{upper}}
+<button bind:tap="change" data-e="{{'my world'}}">change</button>
+```
+`data-e`将作为`change`的参数
+```javascript
+vm.change('my world')
+```
 
 小程序事件处理函数不能直接传参，有且只有事件对象作为参数，
 但要传递参数时只能能过`data-x="{{'value'}}"`，然后`event.target.dataset`的方式获取
 
 所以，为了方便，本框架将`dataset`作为第二个参数传给处理处理函数
+
+另外，实际上大多数情况我们并不会用到`event`，所以，本框架做了另外一个语法糖，如果存在`data-e`时，将代替`event`直接作为处理函数的参数
 ```javascript
-handler(event, dataset)
+handler(event||data-e, dataset)
 ```
 
-但实际上大多数情况，我们并不会用到`event`，所以，本框架做了另外一个语法糖，如果存在`data-e`时，将代替`event`直接作为处理函数的参数
-```html
-{{model}} | {{upper}}
-<button bind:tap="change" data-e="{{'my world'}}">change</button>
-```
-```javascript
-vm.change('my world')
-```
 
-需要注意的是：
+注意：
 
-小程序的`dataset`传递的参数是原数据的一个**副本**，所以传参为对象类型时，并**不能**与原数据通过`==`判断**相等**
+小程序的`dataset`传递的参数是原数据的一个**副本**，所以传参为对象类型时，并**不能**与原数据通过`==`相等
 
 这是小程序底层实现所决定的，这应该是底层设计存在缺陷
-
-但是你可以通过对象的唯一字段再去查找
 
 ## 使用方法
 
