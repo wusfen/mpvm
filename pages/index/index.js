@@ -16,7 +16,8 @@ var vm = Page.vm({
   },
   // 方法
   methods: {
-    change: function (name) {
+    change: function (name, data) {
+      console.log(arguments)
       this.model = 'hello ' + (name || 'world')
     }
   },

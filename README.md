@@ -42,17 +42,21 @@ var vm = Page.vm({
 ```
 
 ## 视图层
-因为框架非常轻量，视图层没有多大变化
+因为框架比较轻量，视图层没有多大变化
 
-小程序事件处理函数并不支持直接传参，只能通过`event.target.dataset`的方法传递参数，比较麻烦
+小程序事件处理函数不能直接传参，有且只有事件对象作为参数，
+但要传递参数时只能能过`data-x="{{'value'}}"`，然后`event.target.dataset`的方式获取
 
-本框架做了个语法糖，如果存在`data-arg`时，其值将做为事件处理函数的第一个参数
+所以，为了方便，本框架将`dataset`作为第二个参数传给处理处理函数
+```javascript
+handler(event, dataset)
+```
 
+但实际上大多数情况，我们并不会用到`event`，所以，本框架做了另外一个语法糖，如果存在`data-e`时，将代替`event`直接作为处理函数的参数
 ```html
 {{model}} | {{upper}}
-<button bind:tap="change" data-arg="{{'my world'}}">change</button>
+<button bind:tap="change" data-e="{{'my world'}}">change</button>
 ```
-即相当于点击时
 ```javascript
 vm.change('my world')
 ```

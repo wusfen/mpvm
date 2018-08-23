@@ -27,11 +27,10 @@ function VM(options) {
   // onLoad
   options.mounted = options.mounted || options.onLoad
   options.onLoad = function () {
-    var self = this
     // $page
     data.$page = this
-    // $route
     data.$route = this.route
+
     // mounted
     setTimeout(function(){
       options.mounted && options.mounted()
@@ -59,18 +58,20 @@ VM.assign = function (data, options) {
     _options,
   )
 }
-// bind this, render, computed, e->arg
+// bind this, render, computed, handler(e||dataset.e, dataset)
 VM.inject = function (vm, fn) {
   var $fn = function (e) {
     var args = arguments
 
-    // data-arg="value" -> handler(value)
+    // handler(e||a, dataset)
     var target = e && e.target
     if (target) {
+      args = [e]
       var dataset = target.dataset
-      if (dataset.arg) {
-        args = [dataset.arg]
+      if (dataset.e !== undefined) {
+        args[0] = dataset.e
       }
+      args[1] = dataset
     }
 
     // result
