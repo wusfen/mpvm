@@ -1,23 +1,25 @@
 Page.vm = function (options) {
-  // data -> vm
-  var data = options.data || {}
-  Object.assign(data,
-    options.computed,
-    options.methods
-  )
-  // page event handlers
-  var _data = Object.assign({}, options)
-  delete _data.data
-  delete _data.computed
-  delete _data.methods
-  Object.assign(data, _data)
+  return new VM(options)
+}
 
-  // inject
+function VM(options) {
+
+  // data
+  var data = this
+  VM.assign(this, options)
+  options.data = data
+
+  // proxy
+  var proxy = VM.getProxy(data)
+
+  // methods
   for (var key in data) {
+    if (!data.hasOwnProperty(key)) continue
     !function (fn) {
       if (typeof fn == 'function') {
-        data[key] = injectFunction(data, fn)
-        options[key] = data[key]
+        // bind proxy
+        var $fn = VM.inject(proxy, fn)
+        options[key] = data[key] = $fn
       }
     }(data[key])
   }
@@ -25,58 +27,63 @@ Page.vm = function (options) {
   // onLoad
   options.mounted = options.mounted || options.onLoad
   options.onLoad = function () {
-    var self = this
     // $page
     data.$page = this
-    // setData
-    data.setData = function () {
-      self.setData.apply(self, arguments)
-    }
-    // $foceUpdate
-    data.$foceUpdate = function () {
-      foceUpdate(data)
-    }
-    // $route
     data.$route = this.route
+
     // mounted
-    options.mounted && options.mounted.apply(this, arguments)
+    setTimeout(function () {
+      options.mounted && options.mounted()
+    }, 1)
   }
 
-  // Page init
+  // init
   Page(options)
-  Page.data = data
+  Page.options = options
+  Page.data = this
+  Page.proxy = proxy
 
-  return data
+  // return proxy
+  return proxy
 }
-
-// bind this, render, computed, e->arg
-function injectFunction(vm, fn) {
+VM.assign = function (data, options) {
+  var _options = Object.assign({}, options)
+  delete _options.data
+  delete _options.methods
+  delete _options.computed
+  Object.assign(data,
+    options.data,
+    options.methods,
+    options.computed,
+    _options,
+  )
+}
+// bind this, render, computed, handler(e||dataset.e, dataset)
+VM.inject = function (vm, fn) {
   var $fn = function (e) {
     var args = arguments
 
-    // data-arg="value" -> handler(value)
+    // handler(e||a, dataset)
     var target = e && e.target
     if (target) {
+      args = [e]
       var dataset = target.dataset
-      if (dataset.arg) {
-        args = [dataset.arg]
+      if (dataset.e !== undefined) {
+        args[0] = dataset.e
       }
+      args[1] = dataset
     }
 
-    // handler
-    var rs = fn.apply(vm, args)
-
-    // update view
-    foceUpdate(vm)
-
     // result
-    return rs
+    return fn.apply(vm, args)
   }
 
-  // coumputed
+  // computed
   if (fn.toString().match('return')) {
     $fn.toJSON = $fn.toString = $fn.valueOf = function () {
-      return fn.apply(vm, arguments)
+      // 避免 toJSON->$render->setData->toJSON 死循环
+      vm.__isToJSON__ = true
+      return fn.call(vm)
     }
   }
 
@@ -85,29 +92,64 @@ function injectFunction(vm, fn) {
 
   return $fn
 }
-
-// update view
-function foceUpdate(vm) {
-  // newData
-  var newData = {}
-  for (var key in vm) {
-    !function (value) {
-      if (typeof value == 'function') { // computed
-        var fun = value.fn || value
-        if (!fun.toString().match('return')) {
-          return
+VM.getProxy = function (data) {
+  return new Proxy(data, {
+    set: function (data, key, value) {
+      data[key] = value
+      data.$render()
+      return true
+    },
+    get: function (data, key) {
+      data.$render()
+      return data[key]
+    }
+  })
+}
+VM.prototype = {
+  $route: '',
+  $page: null,
+  setData: function () {
+    var $page = this.$page
+    $page.setData.apply($page, arguments)
+  },
+  $foceUpdate: function () {
+    console.log('$foceUpdate')
+    var vm = this
+    // newData
+    var newData = {}
+    for (var key in vm) {
+      !function (value) {
+        if (typeof value == 'function') { // computed
+          var fun = value.fn || value
+          if (!fun.toString().match('return')) {
+            return
+          }
         }
-      }
-      if (value === undefined) { // fix setData undefined
-        value = ''
-      }
-      newData[key] = value
-    }(vm[key])
-  }
+        if (value === undefined) { // fix setData undefined
+          value = ''
+        }
+        newData[key] = value
+      }(vm[key])
+    }
 
-  // protected
-  delete newData.$page
+    // protected
+    delete newData.$page
 
-  // update view
-  vm.setData(newData)
+    // update view
+    vm.setData(newData)
+  },
+  $render: function () {
+    if (this.__isToJSON__) {
+      setTimeout(function () {
+        this.__isToJSON__ = false
+      }.bind(this), 1)
+      return
+    }
+
+    var self = this
+    clearTimeout(this.__timer__)
+    this.__timer__ = setTimeout(function () {
+      self.$foceUpdate()
+    }, 41)
+  },
 }
