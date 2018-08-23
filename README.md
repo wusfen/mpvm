@@ -72,7 +72,7 @@ handler(event||data-e, dataset)
 
 ## 使用方法
 
-1. 在入口文件`app.js`中引入`mpvm.js`
+1. 在入口文件`app.js`中引入[mpvm.js](https://github.com/wusfen/mpvm/blob/master/mpvm.js)
 ```javascript
 require('./mpvm.js')
 ```
