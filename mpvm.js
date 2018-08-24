@@ -27,13 +27,16 @@ function VM(options) {
   // onLoad
   options.mounted = options.mounted || options.onLoad
   options.onLoad = function () {
+    var self = this
+    var args = arguments
+
     // $page
     data.$page = this
     data.$route = this.route
 
     // mounted
     setTimeout(function () {
-      options.mounted && options.mounted()
+      options.mounted && options.mounted.apply(self, args)
     }, 1)
   }
 
@@ -113,7 +116,7 @@ VM.prototype = {
     $page.setData.apply($page, arguments)
   },
   $foceUpdate: function () {
-    console.log('$foceUpdate')
+    // console.log('$foceUpdate')
     var vm = this
     // newData
     var newData = {}
