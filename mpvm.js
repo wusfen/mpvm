@@ -32,6 +32,7 @@ function VM(options) {
 
     // $page
     data.$page = this
+    data.$page.toJSON = function () { } // $page.data.$page.data..
     data.$route = this.route
 
     // mounted
@@ -136,7 +137,7 @@ VM.prototype = {
     }
 
     // protected
-    delete newData.$page
+    delete newData.$page // --console.warn
 
     // update view
     vm.setData(newData)
