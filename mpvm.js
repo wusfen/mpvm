@@ -68,17 +68,18 @@ VM.inject = function (vm, fn) {
     var args = arguments
 
     // handler(e||a, dataset)
-    var target = e && e.target
-    if (target) {
-      args = [e]
-      var dataset = target.dataset
-      if (dataset.e !== undefined) {
-        args[0] = dataset.e
+    if (!this.$page) { // by view
+      if (e && e.target) {
+        var dataset = e.target.dataset || {}
+        args[0] = e
+        args[1] = dataset
+        if ('e' in dataset) {
+          args[0] = dataset.e
+        }
       }
-      args[1] = dataset
     }
 
-    // result
+    // bind this, result
     return fn.apply(vm, args)
   }
 
