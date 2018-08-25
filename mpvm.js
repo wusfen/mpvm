@@ -39,13 +39,13 @@ function VM(options) {
     setTimeout(function () {
       options.mounted && options.mounted.apply(self, args)
     }, 1)
+
+    // dev
+    Page.data = data
   }
 
   // init
   Page(options)
-  Page.options = options
-  Page.data = this
-  Page.proxy = proxy
 
   // return proxy
   return proxy
@@ -157,3 +157,5 @@ VM.prototype = {
     }, 41)
   },
 }
+
+module.exports = VM
