@@ -83,6 +83,7 @@ VM.inject = function (vm, fn) {
     if (!this.$page) { // by view
       if (e && e.target) {
         var dataset = e.target.dataset || {}
+        args = []
         args[0] = e
         args[1] = dataset
         if ('e' in dataset) {

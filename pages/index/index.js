@@ -17,15 +17,15 @@ var vm = Page.vm({
   // 方法
   methods: {
     change: function (name, data) {
-      console.log(arguments)
+      console.log(name, data)
       this.model = 'hello ' + (name || 'world')
     }
   },
   // onLoad
   mounted: function () {
+    // console.log('mounted')
     this.change('world')
     this.obj.sub.key = 'new sub'
-    console.log('mounted')
   }
 })
 
