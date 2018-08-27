@@ -39,7 +39,11 @@ function VM(options) {
     setTimeout(function () {
       options.mounted && options.mounted.apply(self, args)
     }, 1)
-
+  }
+  // onShow
+  var _onShow = options.onShow
+  options.onShow = function(){
+    _onShow && _onShow.apply(this, arguments)
     // dev
     Page.options = options
     Page.data = data
@@ -64,7 +68,7 @@ VM.assign = function (data, options) {
   )
   for (var key in options.computed) {
     var fn = options.computed[key]
-    if(typeof fn == 'function'){
+    if (typeof fn == 'function') {
       fn.isComputed = true
     }
   }
