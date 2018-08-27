@@ -42,9 +42,10 @@ function VM(options) {
   }
   // onShow
   var _onShow = options.onShow
-  options.onShow = function(){
+  options.onShow = function () {
     _onShow && _onShow.apply(this, arguments)
     // dev
+    Page[this.route] = this
     Page.options = options
     Page.data = data
   }
