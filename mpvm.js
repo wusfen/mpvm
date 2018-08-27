@@ -41,6 +41,7 @@ function VM(options) {
     }, 1)
 
     // dev
+    Page.options = options
     Page.data = data
   }
 
@@ -61,13 +62,19 @@ VM.assign = function (data, options) {
     options.computed,
     _options,
   )
+  for (var key in options.computed) {
+    var fn = options.computed[key]
+    if(typeof fn == 'function'){
+      fn.isComputed = true
+    }
+  }
 }
-// bind this, render, computed, handler(e||dataset.e, dataset)
+// bind this, render, computed, handler(dataset.e||e, dataset)
 VM.inject = function (vm, fn) {
   var $fn = function (e) {
     var args = arguments
 
-    // handler(e||a, dataset)
+    // handler(dataset.e||e, dataset)
     if (!this.$page) { // by view
       if (e && e.target) {
         var dataset = e.target.dataset || {}
@@ -84,7 +91,7 @@ VM.inject = function (vm, fn) {
   }
 
   // computed
-  if (fn.toString().match('return')) {
+  if (fn.isComputed) {
     $fn.toJSON = $fn.toString = $fn.valueOf = function () {
       // 避免 toJSON->$render->setData->toJSON 死循环
       vm.__isToJSON__ = true
