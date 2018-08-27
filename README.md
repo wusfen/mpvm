@@ -60,7 +60,7 @@ vm.change('my world')
 
 另外，实际上大多数情况我们并不会用到`event`，所以，本框架做了另外一个语法糖，如果存在`data-e`时，将代替`event`直接作为处理函数的参数
 ```javascript
-handler(event||data-e, dataset)
+handler(dataset.e||event, dataset)
 ```
 
 
