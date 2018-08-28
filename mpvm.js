@@ -41,10 +41,12 @@ function VM(options) {
       options.mounted && options.mounted.apply(self, args)
     }, 1)
   }
+
   // onShow
   var _onShow = options.onShow
   options.onShow = function() {
     _onShow && _onShow.apply(this, arguments)
+    data.$render()
     // dev
     Page[this.route] = this
     Page.page = this
@@ -116,7 +118,7 @@ VM.inject = function(vm, fn) {
   return $fn
 }
 VM.getProxy = function(data) {
-  // Proxy = undefined
+  Proxy = undefined
   if (typeof Proxy == 'undefined') {
     var proxy = {}
     for (var key in data) {
@@ -184,10 +186,10 @@ VM.prototype = {
     vm.setData(newData)
   },
   $render: function() {
-    if(VM.__isToJSON__) return
+    if (VM.__isToJSON__) return
 
     var pages = getCurrentPages()
-    if(this.$page != pages[pages.length-1]) return
+    if (this.$page != pages[pages.length - 1]) return
 
     var self = this
     clearTimeout(this.__timer__)
