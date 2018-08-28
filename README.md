@@ -47,7 +47,7 @@ var vm = Page.VM({
 
 `mounted`映射为`onLoad`
 
-### 控制台
+### 控制台调试
 
 1. 在开发工具控制台可以通过`Page.vm`访问当前页面的`vm`，方便调试
 
