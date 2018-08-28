@@ -1,8 +1,6 @@
 # mpvm
 微信小程序轻量框架（类Vue语法）
 
-主要对逻辑层进行改造封装
-
 
 ## 逻辑层
 
@@ -31,15 +29,32 @@ var vm = Page.VM({
 })
 ```
 
+### this
+
 成员函数内的`this`指向`data`作为`vm`, 并且`computed` `methods`的成员也通过`this`访问
 
-在成员函数内，直接通过`this`修改数据即可，无须`this.setData`，框架会自动更新视图
+### 无须setData
 
-`Page.vm()`返回`this`，可以在成员函数内使用变量名（如`vm`）代替`this`
+直接通过`this`修改数据即可，无须`this.setData`，框架会自动更新视图
+
+`Page.VM()`返回`this`，可以在成员函数内使用变量名（如`vm`）代替`this`
+
+解决了小程序原生不能把数据改成`undefined`的缺陷
+
+### mounted
 
 `mounted`映射为`onLoad`
 
-解决了小程序原生不能把数据改成`undefined`的缺陷
+### 控制台
+
+在开发工具控制台可以通过`Page.vm`访问当前页面的`vm`，方便调试
+
+```javascript
+Page.vm.model = 'new model'
+```
+
+通过`Page.page`可以访问原生的`page`实例
+
 
 ## 视图层
 因为框架比较轻量，视图层没有多大变化
