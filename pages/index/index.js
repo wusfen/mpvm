@@ -24,8 +24,8 @@ var vm = Page.VM({
   // onLoad
   mounted: function () {
     // console.log('mounted')
-    this.change('world')
-    this.obj.sub.key = 'new sub'
+    // this.change('world')
+    // this.obj.sub.key = 'new sub'
   }
 })
 
