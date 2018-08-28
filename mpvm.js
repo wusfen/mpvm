@@ -48,7 +48,7 @@ function VM(options) {
     // dev
     Page[this.route] = this
     Page.options = options
-    Page.data = data
+    Page.vm = proxy
   }
 
   // init
