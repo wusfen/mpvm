@@ -14,14 +14,15 @@ function VM(options) {
 
   // methods
   for (var key in data) {
-    if (!data.hasOwnProperty(key)) continue
-    !function (fn) {
-      if (typeof fn == 'function') {
-        // bind proxy
-        var $fn = VM.inject(proxy, fn)
-        options[key] = data[key] = $fn
-      }
-    }(data[key])
+    if (data.hasOwnProperty(key)) {
+      ! function (fn) {
+        if (typeof fn == 'function') {
+          // bind proxy
+          var $fn = VM.inject(proxy, fn)
+          options[key] = data[key] = $fn
+        }
+      }(data[key])
+    }
   }
 
   // onLoad
@@ -111,6 +112,27 @@ VM.inject = function (vm, fn) {
   return $fn
 }
 VM.getProxy = function (data) {
+  Proxy = undefined
+  if (typeof Proxy == 'undefined') {
+    var proxy = {}
+    for (var key in data) {
+      ! function (key) {
+        Object.defineProperty(proxy, key, {
+          enumerable: true,
+          configurable: true,
+          get: function () {
+            data.$render()
+            return data[key]
+          },
+          set: function (value) {
+            data.$render()
+            data[key] = value
+          }
+        })
+      }(key)
+    }
+    return proxy
+  }
   return new Proxy(data, {
     set: function (data, key, value) {
       data[key] = value
@@ -136,7 +158,7 @@ VM.prototype = {
     // newData
     var newData = {}
     for (var key in vm) {
-      !function (value) {
+      ! function (value) {
         if (typeof value == 'function') { // computed
           var fun = value.fn || value
           if (!fun.toString().match('return')) {
