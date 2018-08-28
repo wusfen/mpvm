@@ -47,7 +47,9 @@ function VM(options) {
     _onShow && _onShow.apply(this, arguments)
     // dev
     Page[this.route] = this
+    Page.page = this
     Page.options = options
+    Page.data = data
     Page.vm = proxy
   }
 
@@ -114,7 +116,7 @@ VM.inject = function(vm, fn) {
   return $fn
 }
 VM.getProxy = function(data) {
-  Proxy = undefined
+  // Proxy = undefined
   if (typeof Proxy == 'undefined') {
     var proxy = {}
     for (var key in data) {
@@ -128,8 +130,8 @@ VM.getProxy = function(data) {
             return data[key]
           },
           set: function(value) {
-            data.$render()
             data[key] = value
+            data.$render()
           }
         })
       }(key)
@@ -138,13 +140,11 @@ VM.getProxy = function(data) {
   }
   return new Proxy(data, {
     set: function(data, key, value) {
-      console.log(key)
       data[key] = value
       data.$render()
       return true
     },
     get: function(data, key) {
-      console.log(key)
       data.$render()
       return data[key]
     }
@@ -185,6 +185,10 @@ VM.prototype = {
   },
   $render: function() {
     if(VM.__isToJSON__) return
+
+    var pages = getCurrentPages()
+    if(this.$page != pages[pages.length-1]) return
+
     var self = this
     clearTimeout(this.__timer__)
     this.__timer__ = setTimeout(function() {
