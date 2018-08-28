@@ -160,7 +160,7 @@ VM.prototype = {
     $page.setData.apply($page, arguments)
   },
   $foceUpdate: function() {
-    console.log('$foceUpdate')
+    // console.log('$foceUpdate')
     var vm = this
     // newData
     var newData = {}
