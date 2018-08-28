@@ -35,9 +35,9 @@ var vm = Page.VM({
 
 ### 无须setData
 
-直接通过`this`修改数据即可，无须`this.setData`，框架会自动更新视图
+直接通过`this`修改数据即可，框架会自动更新视图，即使在异步函数（如`setTimeout`）内亦可
 
-`Page.VM()`返回`this`，可以在成员函数内使用变量名（如`vm`）代替`this`
+`var vm = Page.VM()`返回`this`，方便在异步函数内直接使用`vm`
 
 解决了小程序原生不能把数据改成`undefined`的缺陷
 
@@ -47,13 +47,13 @@ var vm = Page.VM({
 
 ### 控制台
 
-在开发工具控制台可以通过`Page.vm`访问当前页面的`vm`，方便调试
+1. 在开发工具控制台可以通过`Page.vm`访问当前页面的`vm`，方便调试
 
 ```javascript
 Page.vm.model = 'new model'
 ```
 
-通过`Page.page`可以访问原生的`page`实例
+2. 通过`Page.page`可以访问原生的`page`实例
 
 
 ## 视图层
