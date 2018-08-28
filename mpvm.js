@@ -1,4 +1,4 @@
-Page.vm = function (options) {
+Page.VM = function (options) {
   return new VM(options)
 }
 

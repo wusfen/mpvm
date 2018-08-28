@@ -7,7 +7,7 @@
 ## 逻辑层
 
 ```javascript
-var vm = Page.vm({
+var vm = Page.VM({
   // 数据
   data: {
     model: 'mpvm.js'
@@ -78,7 +78,7 @@ require('./mpvm.js')
 ```
 2. 在具体页面的js中直接使用即可
 ```javascript
-Page.vm(options)
+Page.VM(options)
 ```
 
 

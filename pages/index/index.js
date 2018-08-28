@@ -1,4 +1,4 @@
-var vm = Page.vm({
+var vm = Page.VM({
   // 数据
   data: {
     model: 'mpvm.js',
