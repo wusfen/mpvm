@@ -118,7 +118,7 @@ VM.inject = function(vm, fn) {
   return $fn
 }
 VM.getProxy = function(data) {
-  Proxy = undefined
+  // var Proxy = undefined // test
   if (typeof Proxy == 'undefined') {
     var proxy = {}
     for (var key in data) {
