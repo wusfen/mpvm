@@ -54,6 +54,23 @@ function VM(options) {
     Page.vm = proxy
   }
 
+  // $model
+  // bindinput="$model" data-model="model" value="{{model}}"
+  options.$model = function(e) {
+    var vm = proxy
+    var path = e.target.dataset.model
+    path = path.replace(/\]/g, '')
+    path = path.split(/[.[]/)
+    var obj = vm
+    for (var i = 0; i < path.length - 1; i++) {
+      var key = path[i]
+      obj = obj[key]
+    }
+    var key = path[path.length - 1]
+
+    obj[key] = e.detail.value
+  }
+
   // init
   // 小程序Page会对data进一行stringify传到视图层
   Page(options)

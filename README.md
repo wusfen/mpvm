@@ -1,8 +1,6 @@
 # mpvm
 微信小程序轻量框架（类Vue语法）
 
-↓一分钟上手
-
 
 ## 逻辑层
 
@@ -65,6 +63,9 @@ Page.vm.model = 'new model'
 {{model}} | {{upper}}
 <button bind:tap="change" data-e="{{'my world'}}">change</button>
 ```
+
+### 视图层传参到逻辑层
+
 `data-e`将作为`change`的参数
 ```javascript
 vm.change('my world')
@@ -80,12 +81,25 @@ vm.change('my world')
 handler(dataset.e||event, dataset)
 ```
 
-
 注意：
 
 小程序的`dataset`传递的参数是原数据的一个**副本**，所以传参为对象类型时，并**不能**与原数据通过`==`相等
 
 这是小程序底层实现所决定的，这应该是底层设计存在缺陷
+
+### 双向绑定
+
+小程序没没有直接进行双向绑定
+
+view->model: 本框架通过内置的`$model`和`data-model`实现视图层到逻辑层的数据修改
+
+model->view: 逻辑层到视图层的数据传递还是原生小程序的`value="{{model}}"`
+
+`$model`
+```html
+<input bindinput="$model" data-model="model" value="{{model}}></input>
+```
+
 
 ## 使用方法
 

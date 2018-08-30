@@ -1,1 +1,2 @@
 {{model}} | {{upper}}
+<button bindtap="change">change</button>
