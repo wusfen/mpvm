@@ -33,19 +33,18 @@ function VM(options) {
 
     // $page
     data.$page = this
-    data.$page.toJSON = function() {} // $page.data.$page.data..
+    data.$page.toJSON = function() {} // 小程序setData时会对data进行stringify $page.data.$page.data..
     data.$route = this.route
 
     // mounted
-    setTimeout(function() {
-      options.mounted && options.mounted.apply(self, args)
-    }, 1)
+    options.mounted && options.mounted.apply(self, args)
   }
 
   // onShow
   var _onShow = options.onShow
   options.onShow = function() {
     _onShow && _onShow.apply(this, arguments)
+    // 恢复当前页时更新一次视图
     data.$render()
     // dev
     Page[this.route] = this
@@ -56,11 +55,14 @@ function VM(options) {
   }
 
   // init
+  // 小程序Page会对data进一行stringify传到视图层
   Page(options)
 
   // return proxy
   return proxy
 }
+
+// options.fn, comupted, methods -> this
 VM.assign = function(data, options) {
   var _options = Object.assign({}, options)
   delete _options.data
@@ -79,7 +81,8 @@ VM.assign = function(data, options) {
     }
   }
 }
-// bind this, render, computed, handler(dataset.e||e, dataset)
+
+// bind this, computed, handler(dataset.e||e, dataset)
 VM.inject = function(vm, fn) {
   var $fn = function(e) {
     var args = arguments
@@ -105,9 +108,9 @@ VM.inject = function(vm, fn) {
   if (fn.isComputed) {
     $fn.toJSON = $fn.toString = $fn.valueOf = function() {
       // 避免 toJSON->$render->setData->toJSON 死循环
-      VM.__isToJSON__ = true
+      VM.noRender = true
       var rs = fn.call(vm)
-      VM.__isToJSON__ = false
+      VM.noRender = false
       return rs
     }
   }
@@ -117,41 +120,29 @@ VM.inject = function(vm, fn) {
 
   return $fn
 }
+
+// trigger $render
 VM.getProxy = function(data) {
-  // var Proxy = undefined // test
-  if (typeof Proxy == 'undefined') {
-    var proxy = {}
-    for (var key in data) {
-      ! function(key) {
-        proxy[key] = data[key]
-        Object.defineProperty(proxy, key, {
-          enumerable: true,
-          configurable: true,
-          get: function() {
-            data.$render()
-            return data[key]
-          },
-          set: function(value) {
-            data[key] = value
-            data.$render()
-          }
-        })
-      }(key)
-    }
-    return proxy
+  var proxy = {}
+  for (var key in data) {
+    ! function(key) {
+      proxy[key] = data[key]
+      Object.defineProperty(proxy, key, {
+        get: function() {
+          data.$render()
+          return data[key]
+        },
+        set: function(value) {
+          data[key] = value
+          data.$render()
+        }
+      })
+    }(key)
   }
-  return new Proxy(data, {
-    set: function(data, key, value) {
-      data[key] = value
-      data.$render()
-      return true
-    },
-    get: function(data, key) {
-      data.$render()
-      return data[key]
-    }
-  })
+  return proxy
 }
+
+// prototype
 VM.prototype = {
   $route: '',
   $page: null,
@@ -160,7 +151,7 @@ VM.prototype = {
     $page.setData.apply($page, arguments)
   },
   $foceUpdate: function() {
-    // console.log('$foceUpdate')
+    console.log('$foceUpdate')
     var vm = this
     // newData
     var newData = {}
@@ -186,14 +177,15 @@ VM.prototype = {
     vm.setData(newData)
   },
   $render: function() {
-    if (VM.__isToJSON__) return
+    if (VM.noRender) return
 
+    // 非当前页不更新视图
     var pages = getCurrentPages()
     if (this.$page != pages[pages.length - 1]) return
 
     var self = this
-    clearTimeout(this.__timer__)
-    this.__timer__ = setTimeout(function() {
+    clearTimeout(this.$render.timer)
+    this.$render.timer = setTimeout(function() {
       self.$foceUpdate()
     }, 1)
   },

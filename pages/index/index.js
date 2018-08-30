@@ -6,7 +6,7 @@ var vm = Page.VM({
       sub: {
         key: 'sub value'
       }
-    }
+    },
   },
   // 计算属性
   computed: {
