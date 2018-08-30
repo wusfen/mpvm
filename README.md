@@ -63,13 +63,12 @@ Page.vm.model = 'new model'
 {{model}} | {{upper}}
 <button bind:tap="change" data-e="{{'my world'}}">change</button>
 ```
-
-### 视图层传参到逻辑层
-
 `data-e`将作为`change`的参数
 ```javascript
 vm.change('my world')
 ```
+
+### 传参
 
 小程序事件处理函数不能直接传参，有且只有事件对象作为参数，
 但要传递参数时只能能过`data-x="{{'value'}}"`，然后`event.target.dataset`的方式获取
@@ -77,6 +76,7 @@ vm.change('my world')
 所以，为了方便，本框架将`dataset`作为第二个参数传给处理处理函数
 
 另外，实际上大多数情况我们并不会用到`event`，所以，本框架做了另外一个语法糖，如果存在`data-e`时，将代替`event`直接作为处理函数的参数
+
 ```javascript
 handler(dataset.e||event, dataset)
 ```
