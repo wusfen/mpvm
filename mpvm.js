@@ -1,3 +1,4 @@
+/*! @preserve https://github.com/wusfen/mpvm */
 Page.VM = function(options) {
   return new VM(options)
 }
@@ -113,6 +114,9 @@ VM.inject = function(vm, fn) {
         args[1] = dataset
         if ('e' in dataset) {
           args[0] = dataset.e
+        }
+        if('args' in dataset){
+          args = dataset.args
         }
       }
     }
