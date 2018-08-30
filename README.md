@@ -89,7 +89,7 @@ handler(dataset.e||event, dataset)
 
 ### 双向绑定
 
-小程序没没有直接进行双向绑定
+小程序没有直接进行双向绑定
 
 view->model: 本框架通过内置的`$model`方法和`data-model`实现视图层到逻辑层的数据修改
 
