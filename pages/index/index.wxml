@@ -1,3 +1,2 @@
 {{model}} | {{upper}}
 <button id="{{ {id:1} }}" bind:tap="change" data-e="my world" data-url="uuu">change</button>
-{{obj.sub.key}}
