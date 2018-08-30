@@ -89,13 +89,12 @@ handler(dataset.e||event, dataset)
 
 ### 双向绑定
 
-小程序没有直接进行双向绑定
+小程序没有直接进行双向绑定，本框架通语法糖实现
 
 view->model: 本框架通过内置的`$model`方法和`data-model`实现视图层到逻辑层的数据修改
 
 model->view: 逻辑层到视图层的数据传递还是原生小程序的`value="{{model}}"`
 
-`$model`
 ```html
 <input bindinput="$model" data-model="model" value="{{model}}></input>
 ```
