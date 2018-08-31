@@ -1,0 +1,4 @@
+<!--pages/sub/sub.wxml-->
+<view>pages/sub/sub.wxml</view>
+
+{{model}}

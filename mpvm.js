@@ -5,10 +5,9 @@ Page.VM = function(options) {
 
 function VM(options) {
 
-  // data
+  // vm data
   var data = this
   VM.assign(this, options)
-  options.data = data
 
   // proxy
   var proxy = VM.getProxy(data)
@@ -18,9 +17,11 @@ function VM(options) {
     if (data.hasOwnProperty(key)) {
       ! function(fn) {
         if (typeof fn == 'function') {
-          // bind proxy
+          // bind proxy, computed
           var $fn = VM.inject(proxy, fn)
-          options[key] = data[key] = $fn
+          data[key] = $fn
+          // Page methods
+          options[key] = $fn
         }
       }(data[key])
     }
@@ -33,8 +34,8 @@ function VM(options) {
     var args = arguments
 
     // $page
+    data.$app = getApp()
     data.$page = this
-    data.$page.toJSON = function() {} // 小程序setData时会对data进行stringify $page.data.$page.data..
     data.$route = this.route
 
     // mounted
@@ -45,7 +46,7 @@ function VM(options) {
   var _onShow = options.onShow
   options.onShow = function() {
     _onShow && _onShow.apply(this, arguments)
-    // 恢复当前页时更新一次视图
+    // 首次||恢复当前页时更新一次视图
     data.$render()
     // dev
     Page[this.route] = this
@@ -73,7 +74,8 @@ function VM(options) {
   }
 
   // init
-  // 小程序Page会对data进一行stringify传到视图层
+  // 小程序每次进入页面时会对options.data进行一次stringify传到视图层
+  options.data = {}
   Page(options)
 
   // return proxy
@@ -128,7 +130,7 @@ VM.inject = function(vm, fn) {
   // computed
   if (fn.isComputed) {
     $fn.toJSON = $fn.toString = $fn.valueOf = function() {
-      // 避免 toJSON->$render->setData->toJSON 死循环
+      // toJSON->fn():model:proxy->$render!!(noRender)->setData->toJSON
       VM.noRender = true
       var rs = fn.call(vm)
       VM.noRender = false
@@ -165,8 +167,9 @@ VM.getProxy = function(data) {
 
 // prototype
 VM.prototype = {
-  $route: '',
+  $app: null,
   $page: null,
+  $route: '',
   setData: function() {
     var $page = this.$page
     $page.setData.apply($page, arguments)
@@ -193,6 +196,8 @@ VM.prototype = {
 
     // protected
     delete newData.$page // --console.warn
+    delete newData.$app
+    console.log('newData', vm, newData)
 
     // update view
     vm.setData(newData)

@@ -1,8 +1,10 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/logs/logs",
-    "pages/try/try"
+    "pages/sub/sub",
+    "pages/try/try",
+    "pages/raw/index",
+    "pages/raw/sub"
   ],
   "window": {
     "backgroundTextStyle": "light",
