@@ -81,6 +81,12 @@ vm.change('my world')
 handler(dataset.e||event, dataset)
 ```
 
+### data-args
+```javascript
+handler(args...)
+```
+
+
 注意：
 
 小程序的`dataset`传递的参数是原数据的一个**副本**，所以传参为对象类型时，并**不能**与原数据通过`==`相等
