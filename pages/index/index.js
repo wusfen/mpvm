@@ -29,6 +29,14 @@ var vm = Page.VM({
   }
 })
 
-// setTimeout(function(){
-//   vm.obj.sub.key = 'setTimeout'
-// },2000)
+setTimeout(function(){
+  vm.obj.sub.key = 'setTimeout'
+  console.log(this)
+},2000)
+
+function f(){
+  var t = Function('return this')()
+  console.log(toString)
+}
+f()
+
