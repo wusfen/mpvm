@@ -60,7 +60,7 @@ function VM(options) {
   // bindinput="$model" data-model="model" value="{{model}}"
   options.$model = function(e) {
     var vm = proxy
-    var path = e.target.dataset.model
+    var path = e.currentTarget.dataset.model
     path = path.replace(/\]/g, '')
     path = path.split(/[.[]/)
     var obj = vm
@@ -109,8 +109,8 @@ VM.inject = function(vm, fn) {
 
     // handler(dataset.e||e, dataset)
     if (!this.$page) { // by view
-      if (e && e.target) {
-        var dataset = e.target.dataset || {}
+      if (e && e.currentTarget) {
+        var dataset = e.currentTarget.dataset || {}
         args = []
         args[0] = e
         args[1] = dataset
