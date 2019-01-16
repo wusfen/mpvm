@@ -1,220 +1,162 @@
 /*! @preserve https://github.com/wusfen/mpvm */
-Page.VM = function(options) {
-  return new VM(options)
-}
-
-function VM(options) {
-
-  // vm data
-  var data = this
-  VM.assign(this, options)
-
-  // proxy
-  var proxy = VM.getProxy(data)
-
-  // methods
-  for (var key in data) {
-    if (data.hasOwnProperty(key)) {
-      ! function(fn) {
-        if (typeof fn == 'function') {
-          // bind proxy, computed
-          var $fn = VM.inject(proxy, fn)
-          data[key] = $fn
-          // Page methods
-          options[key] = $fn
-        }
-      }(data[key])
-    }
-  }
-
-  // onLoad
-  options.mounted = options.mounted || options.onLoad
-  options.onLoad = function() {
+class VM {
+  constructor(options) {
     var self = this
-    var args = arguments
 
-    // $page
-    data.$app = getApp()
-    data.$page = this
-    data.$route = this.route
+    // $xxx
+    Object.assign(this, {
+      $options: options,
+      $app: null,
+      $page: null,
+      $route: null,
+    })
 
-    // mounted
-    options.mounted && options.mounted.apply(self, args)
-  }
+    // options.x -> this
+    for (const key in options) {
+      if (key === 'data' || key === 'computed' || key === 'methods') continue
 
-  // onShow
-  var _onShow = options.onShow
-  options.onShow = function() {
-    _onShow && _onShow.apply(this, arguments)
-    // 首次||恢复当前页时更新一次视图
-    data.$render()
-    // dev
-    Page[this.route] = this
-    Page.page = this
-    Page.options = options
-    Page.data = data
-    Page.vm = proxy
-  }
+      var oldValue = this[key]
+      var newValue = options[key]
 
-  // $model
-  // bindinput="$model" data-model="model" value="{{model}}"
-  options.$model = function(e) {
-    var vm = proxy
-    var path = e.currentTarget.dataset.model
-    path = path.replace(/\]/g, '')
-    path = path.split(/[.[]/)
-    var obj = vm
-    for (var i = 0; i < path.length - 1; i++) {
-      var key = path[i]
-      obj = obj[key]
-    }
-    var key = path[path.length - 1]
-
-    obj[key] = e.detail.value
-  }
-
-  // init
-  // 小程序每次进入页面时会对options.data进行一次stringify传到视图层
-  options.data = {}
-  Page(options)
-
-  // return proxy
-  return proxy
-}
-
-// options.fn, comupted, methods -> this
-VM.assign = function(data, options) {
-  var _options = Object.assign({}, options)
-  delete _options.data
-  delete _options.methods
-  delete _options.computed
-  Object.assign(data,
-    options.data,
-    options.methods,
-    options.computed,
-    _options,
-  )
-  for (var key in options.computed) {
-    var fn = options.computed[key]
-    if (typeof fn == 'function') {
-      fn.isComputed = true
-    }
-  }
-}
-
-// bind this, computed, handler(dataset.e||e, dataset)
-VM.inject = function(vm, fn) {
-  var $fn = function(e) {
-    var args = arguments
-
-    // handler(dataset.e||e, dataset)
-    if (!this.$page) { // by view
-      if (e && e.currentTarget) {
-        var dataset = e.currentTarget.dataset || {}
-        args = []
-        args[0] = e
-        args[1] = dataset
-        if ('e' in dataset) {
-          args[0] = dataset.e
+      if (typeof oldValue === 'function') {
+        this[key] = function () {
+          oldValue.apply(this, arguments)
+          newValue.apply(this, arguments)
         }
-        if('args' in dataset){
-          args = dataset.args
-        }
+      } else {
+        this[key] = newValue
       }
     }
 
-    // bind this, result
-    return fn.apply(vm, args)
-  }
-
-  // computed
-  if (fn.isComputed) {
-    $fn.toJSON = $fn.toString = $fn.valueOf = function() {
-      // toJSON->fn():model:proxy->$render!!(noRender)->setData->toJSON
-      VM.noRender = true
-      var rs = fn.call(vm)
-      VM.noRender = false
-      return rs
+    // computed -> this
+    for (const key in options.computed) {
+      var fn = options.computed[key]
+      this[key] = fn
+      // toJSON -> $render -> !(noRender) -> setData -> toJSON
+      fn.isComputed = true
+      fn.toJSON = fn.toString = fn.valueOf = function () {
+        VM.noRender = true
+        var rs = this.apply(self)
+        VM.noRender = false
+        return rs
+      }
     }
-  }
 
-  // old
-  $fn.fn = fn
+    // methods -> this
+    Object.assign(this, options.methods)
 
-  return $fn
-}
-
-// trigger $render
-VM.getProxy = function(data) {
-  var proxy = {}
-  for (var key in data) {
-    ! function(key) {
-      proxy[key] = data[key]
-      Object.defineProperty(proxy, key, {
-        get: function() {
-          data.$render()
-          return data[key]
-        },
-        set: function(value) {
-          data[key] = value
-          data.$render()
-        }
-      })
-    }(key)
-  }
-  return proxy
-}
-
-// prototype
-VM.prototype = {
-  $app: null,
-  $page: null,
-  $route: '',
-  setData: function() {
-    var $page = this.$page
-    $page.setData.apply($page, arguments)
-  },
-  $foceUpdate: function() {
-    // console.log('$foceUpdate')
-    var vm = this
-    // newData
-    var newData = {}
-    for (var key in vm) {
-      ! function(value) {
-        if (typeof value == 'function') { // computed
-          var fun = value.fn || value
-          if (!fun.isComputed) {
-            return
+    // bind this
+    for (var key in self) {
+      !function () {
+        var fn = self[key]
+        if (typeof fn === 'function' && !fn.isComputed) {
+          self[key] = function () {
+            fn.apply(self, arguments)
           }
         }
-        if (value === undefined) { // fix setData undefined
+      }()
+    }
+
+    // mp Page
+    Page(Object.assign({}, self, {
+      onLoad() {
+        self.$page = this
+        self.onLoad.apply(self, arguments)
+      },
+      onShow() {
+        self.onShow.apply(self, arguments)
+      }
+    }))
+
+    global.this = this
+  }
+  setData() {
+    var $page = this.$page
+    $page.setData.apply($page, arguments)
+  }
+  $foceUpdate() {
+    console.log('$foceUpdate')
+    var self = this
+
+    // newData
+    VM.noRender = true
+    var newData = {}
+    for (var key in self) {
+      ! function (value) {
+        // !data !computed
+        if (typeof value === 'function' && !value.isComputed) {
+          return
+        }
+        // $xxx
+        if (key.match(/^\$/)) {
+          return
+        }
+
+        if (value === undefined) { // fix vm can not setData undefined
           value = ''
         }
         newData[key] = value
-      }(vm[key])
+      }(self[key])
     }
+    VM.noRender = false
 
-    // protected
-    delete newData.$page // --console.warn
-    delete newData.$app
-    // console.log('newData', vm, newData)
+    // console.log('newData', self, newData)
 
     // update view
-    vm.setData(newData)
-  },
-  $render: function() {
+    self.setData(newData)
+  }
+  $render() {
     if (VM.noRender) return
+    var self = this
 
     // 非当前页不更新视图
     var pages = getCurrentPages()
     if (this.$page != pages[pages.length - 1]) return
 
-    var self = this
     clearTimeout(this.$render.timer)
-    this.$render.timer = setTimeout(function() {
+    this.$render.timer = setTimeout(function () {
       self.$foceUpdate()
-    }, 1)
-  },
+    }, 100)
+  }
+  onLoad() {
+    var self = this
+
+    // data()
+    var data = this.$options.data
+    if (typeof data === 'function') {
+      data = data.apply(this)
+    } else {
+      data = JSON.parse(JSON.stringify(data))
+    }
+    Object.assign(this, data)
+
+    // defindeProperty
+    for (var key in data) {
+      !function (value) {
+        // console.log(key, value)
+        Object.defineProperty(self, key, {
+          get: function () {
+            self.$render()
+            return data[key]
+          },
+          set: function (value) {
+            data[key] = value
+            self.$render()
+          }
+        })
+      }(data[key])
+    }
+
+  }
+  onShow() {
+    global.vm = this
+
+    this.$render()
+  }
+  onReady() { }
+  onHide() { }
+  onUnload() { }
+  static mixin() { }
 }
 
-module.exports = VM
+global.VM = VM

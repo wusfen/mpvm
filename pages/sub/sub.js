@@ -1,14 +1,18 @@
-Page.VM({
+var vm = new global.VM({
   data: {
     model: 'model'
   },
   methods: {
-
+    change() {
+      this.model = 'change model'
+    }
   },
-  onLoad: function() {
-    setTimeout(function(){
-      console.log('JSON.stringify(this.$page.data)')
-      console.log(JSON.stringify(this.$page.data,'', '  '))
-    }.bind(this), 1000)
+  onLoad: function () {
+    vm.model = 'model2'
+
+    setInterval(() => {
+      console.log('setInterval')
+      vm.model += '.'
+    }, 1000)
   }
 })

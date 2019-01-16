@@ -1,9 +1,9 @@
-console.log('raw/sub.js once')
+// console.log('raw/sub.js once')
 
 var data = {
   model: 'model',
-  toJSON: function(){
-    console.log('toJSON this==data', this==data)
+  toJSON: function () {
+    console.log('toJSON this==data', this == data)
     return this
   }
 }
@@ -12,7 +12,7 @@ var lastData
 
 var page = Page({
   data: data,
-  onLoad: function(){
+  onLoad: function () {
     Page.app = getApp()
     Page.page = this
 
@@ -24,4 +24,4 @@ var page = Page({
     Page.lastData = lastData = this.data
   }
 })
-console.log('raw/sub Page()', page)
+// console.log('raw/sub Page()', page)

@@ -1,4 +1,2 @@
-<!--pages/sub/sub.wxml-->
-<view>pages/sub/sub.wxml</view>
-
 {{model}}
+<button bind:tap="change">change</button>

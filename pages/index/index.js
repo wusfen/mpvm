@@ -1,42 +1,24 @@
-var vm = Page.VM({
-  // 数据
-  data: {
-    model: 'mpvm.js',
-    obj: {
-      sub: {
-        key: 'sub value'
-      }
-    },
+var vm = new global.VM({
+  data() {
+    console.log('data', this)
+    return {
+      model: 'model'
+    }
   },
-  // 计算属性
   computed: {
-    upper: function () {
-      return vm.model.toUpperCase()
+    upper() {
+      return this.model.toUpperCase()
     }
   },
-  // 方法
   methods: {
-    change: function (name, data) {
-      console.log(name, data)
-      this.model = 'hello ' + (name || 'world')
+    getModel() {
+      return this
+    },
+    change() {
+      vm.model = 'new model'
     }
   },
-  // onLoad
-  mounted: function () {
-    // console.log('mounted')
-    this.change('world')
-    this.obj.sub.key = 'new sub'
+  onLoad() {
+    console.log(this)
   }
 })
-
-setTimeout(function(){
-  vm.obj.sub.key = 'setTimeout'
-  console.log(this)
-},2000)
-
-function f(){
-  var t = Function('return this')()
-  console.log(toString)
-}
-f()
-

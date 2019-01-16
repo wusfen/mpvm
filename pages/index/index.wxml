@@ -1,6 +1,8 @@
-{{model}} | {{upper}}
+<view>model:{{model}}</view>
+<view>computed:{{upper}}</view>
+<!--  -->
 <button id="{{ {id:1} }}" bind:tap="change" data-args="{{['arg1', {k:1}]}}">change</button>
 <input bindinput="$model" data-model="model" value='{{model}}'></input>
-
+<!--  -->
 <navigator url='/pages/sub/sub'>/pages/sub/sub</navigator>
 <navigator url='/pages/raw/index'>/pages/raw/index</navigator>
