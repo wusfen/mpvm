@@ -1,123 +1,139 @@
 /*! @preserve https://github.com/wusfen/mpvm */
-class VM {
-  constructor(options) {
-    var self = this
 
-    // $xxx
-    Object.assign(this, {
-      $options: options,
-      $app: null,
-      $page: null,
-      $route: null,
-    })
+function VM(options) {
+  var self = this
 
-    // options.x -> this
-    for (const key in options) {
-      if (key === 'data' || key === 'computed' || key === 'methods') continue
+  // $xxx
+  Object.assign(this, {
+    $options: options,
+    $app: null,
+    $page: null,
+    $route: null,
+  })
 
-      var oldValue = this[key]
-      var newValue = options[key]
+  // mounted -> onLoad
+  if (options.mounted) {
+    options.onLoad = options.mounted
+  }
 
-      if (typeof oldValue === 'function') {
-        this[key] = function () {
-          oldValue.apply(this, arguments)
-          newValue.apply(this, arguments)
-        }
-      } else {
-        this[key] = newValue
+  // options.x -> this
+  for (const key in options) {
+    if (key === 'data' || key === 'computed' || key === 'methods') continue
+
+    var oldValue = this[key]
+    var newValue = options[key]
+
+    if (typeof oldValue === 'function') {
+      this[key] = function () {
+        oldValue.apply(this, arguments)
+        newValue.apply(this, arguments)
       }
+    } else {
+      this[key] = newValue
     }
+  }
 
-    // computed -> this
-    for (const key in options.computed) {
-      var fn = options.computed[key]
-      this[key] = fn
-      // toJSON -> $render -> !(noRender) -> setData -> toJSON
-      fn.isComputed = true
-      fn.toJSON = fn.toString = fn.valueOf = function () {
-        VM.noRender = true
-        var rs = this.apply(self)
-        VM.noRender = false
-        return rs
-      }
+  // computed -> this
+  for (const key in options.computed) {
+    var fn = options.computed[key]
+    this[key] = fn
+    // toJSON -> $render -> !(noRender) -> setData -> toJSON
+    fn.isComputed = true
+    fn.toJSON = fn.toString = fn.valueOf = function () {
+      VM.noRender = true
+      var rs = this.apply(self)
+      VM.noRender = false
+      return rs
     }
+  }
 
-    // methods -> this
-    Object.assign(this, options.methods)
+  // methods -> this
+  Object.assign(this, options.methods)
 
-    // bind this
-    for (var key in self) {
-      !function () {
-        var fn = self[key]
-        if (typeof fn === 'function' && !fn.isComputed) {
-          self[key] = function () {
-            fn.apply(self, arguments)
+  // mp
+  // this -> mp options
+  var mpOptions = {}
+  for (var key in self) {
+    !function (key, value) {
+      // mp.method
+      if (typeof value === 'function') {
+        mpOptions[key] = function (e) {
+          var args = arguments
+
+          // mp.handler(dataset.e||e, dataset)
+          if (e && e.currentTarget) {
+            var dataset = e.currentTarget.dataset || {}
+            args = []
+            args[0] = e
+            args[1] = dataset
+            if ('e' in dataset) {
+              args[0] = dataset.e
+            }
+            if ('args' in dataset) {
+              args = dataset.args
+            }
           }
-        }
-      }()
-    }
 
-    // mp Page
-    Page(Object.assign({}, self, {
-      onLoad() {
-        self.$page = this
-        self.onLoad.apply(self, arguments)
-      },
-      onShow() {
-        self.onShow.apply(self, arguments)
+          // bind vm, result
+          return self[key].apply(self, args)
+        }
       }
-    }))
-
-    global.this = this
+      // 
+      else {
+        // mpOptions[key] = value
+      }
+    }(key, self[key])
   }
-  setData() {
+
+  // no rewrite setData
+  delete mpOptions.setData
+
+  // this.$page
+  var _onLoad = mpOptions.onLoad
+  mpOptions.onLoad = function () {
+    self.$app = getApp()
+    self.$page = this
+    self.$route = this.route || this.__route__
+    return _onLoad.apply(self, arguments)
+  }
+
+  // mp Page
+  Page(mpOptions)
+}
+Object.assign(VM.prototype, {
+  setData(kv) {
+    if (VM.noRender) return
+    console.log('setData', kv)
     var $page = this.$page
-    $page.setData.apply($page, arguments)
-  }
-  $foceUpdate() {
-    console.log('$foceUpdate')
-    var self = this
 
-    // newData
+    // add computed
     VM.noRender = true
-    var newData = {}
-    for (var key in self) {
-      ! function (value) {
-        // !data !computed
-        if (typeof value === 'function' && !value.isComputed) {
-          return
-        }
-        // $xxx
-        if (key.match(/^\$/)) {
-          return
-        }
-
-        if (value === undefined) { // fix vm can not setData undefined
-          value = ''
-        }
-        newData[key] = value
-      }(self[key])
+    for (var key in this) {
+      var value = this[key]
+      if (value && value.isComputed) {
+        // console.log('isComputed', key)
+        kv[key] = value
+      }
     }
     VM.noRender = false
 
-    // console.log('newData', self, newData)
+    setTimeout(() => {
+      $page.setData.apply($page, [kv])
+    }, 1)
+  },
+  $model(e) {
+    var path = e.currentTarget.dataset.model
+    path = path.replace(/\]/g, '')
+    path = path.split(/[.[]/)
+    var obj = this
+    for (var i = 0; i < path.length - 1; i++) {
+      var key = path[i]
+      obj = obj[key]
+    }
+    var key = path[path.length - 1]
 
-    // update view
-    self.setData(newData)
-  }
-  $render() {
-    if (VM.noRender) return
-    var self = this
-
-    // 非当前页不更新视图
-    var pages = getCurrentPages()
-    if (this.$page != pages[pages.length - 1]) return
-
-    clearTimeout(this.$render.timer)
-    this.$render.timer = setTimeout(function () {
-      self.$foceUpdate()
-    }, 100)
-  }
+    obj[key] = e.detail.value
+  },
   onLoad() {
     var self = this
 
@@ -129,34 +145,62 @@ class VM {
       data = JSON.parse(JSON.stringify(data))
     }
     Object.assign(this, data)
+    this.setData(data)
 
     // defindeProperty
+    // proxy data
     for (var key in data) {
-      !function (value) {
-        // console.log(key, value)
+      !function (key, value) {
         Object.defineProperty(self, key, {
           get: function () {
-            self.$render()
+            // self.$render()
+            var kv = {}
+            kv[key] = data[key]
+            self.setData(kv)
             return data[key]
           },
           set: function (value) {
             data[key] = value
-            self.$render()
+            // self.$render()
+            var kv = {}
+            kv[key] = value
+            self.setData(kv)
           }
         })
-      }(data[key])
+      }(key, data[key])
     }
 
-  }
+  },
   onShow() {
     global.vm = this
+  },
+  onReady() {
 
-    this.$render()
+  },
+  onHide() {
+
+  },
+  onUnload() {
+
+  },
+})
+
+VM.mixin = function (options) {
+  var prototype = VM.prototype
+  for (var key in options) {
+    !function (key, value) {
+      var oldValue = prototype[key]
+      var newValue = value
+      if (typeof oldValue === 'function') {
+        prototype[key] = function () {
+          oldValue.apply(this, arguments)
+          newValue.apply(this, arguments)
+        }
+      } else {
+        prototype[key] = newValue
+      }
+    }(key, options[key])
   }
-  onReady() { }
-  onHide() { }
-  onUnload() { }
-  static mixin() { }
 }
 
-global.VM = VM
+module.exports = VM

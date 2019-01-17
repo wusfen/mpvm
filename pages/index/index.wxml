@@ -1,4 +1,5 @@
 <view>model:{{model}}</view>
+<view>obj.key:{{obj.key}}</view>
 <view>computed:{{upper}}</view>
 <!--  -->
 <button id="{{ {id:1} }}" bind:tap="change" data-args="{{['arg1', {k:1}]}}">change</button>

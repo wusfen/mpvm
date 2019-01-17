@@ -6,7 +6,7 @@
 ## 逻辑层
 
 ```javascript
-var vm = Page.VM({
+var vm = new VM({
   // 数据
   data: {
     model: 'mpvm.js'
@@ -42,19 +42,31 @@ var vm = Page.VM({
 
 解决了小程序原生不能把数据改成`undefined`的缺陷
 
+### VM.mixin
+
+`mixin`可以给所有实例注册方法
+
+```javascript
+VM.mixin({
+  onLoad(){
+    console.log('mixin onLoad')
+  }
+})
+```
+
 ### mounted
 
 `mounted`映射为`onLoad`
 
 ### 控制台调试
 
-1. 在开发工具控制台可以通过`Page.vm`访问当前页面的`vm`，方便调试
+1. 在开发工具控制台可以通过`global.vm`访问当前页面的`vm`，方便调试
 
 ```javascript
-Page.vm.model = 'new model'
+global.vm.model = 'new model'
 ```
 
-2. 通过`Page.page`可以访问原生的`page`实例
+2. 通过`global.vm.page`可以访问原生的`page`实例
 
 
 ## 视图层
@@ -103,7 +115,7 @@ view->model: 本框架通过内置的`$model`方法和`data-model`实现视图�
 model->view: 逻辑层到视图层的数据传递还是原生小程序的`value="{{model}}"`
 
 ```html
-<input bindinput="$model" data-model="model" value="{{model}}></input>
+<input bindinput="$model" data-model="model" value="{{model}}"></input>
 ```
 
 `data-model`支持复杂的层级，如：`data-model="form.list[0].name"`
@@ -113,11 +125,12 @@ model->view: 逻辑层到视图层的数据传递还是原生小程序的`value=
 
 1. 在入口文件`app.js`中引入[mpvm.js](https://github.com/wusfen/mpvm/blob/master/mpvm.js)
 ```javascript
-require('./mpvm.js')
+var VM = require('./mpvm.js')
+global.VM = VM
 ```
 2. 在具体页面的js中直接使用即可
 ```javascript
-Page.VM(options)
+var vm = new global.VM(options)
 ```
 
 
