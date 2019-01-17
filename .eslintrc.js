@@ -69,7 +69,7 @@ module.exports = {
     "no-unused-vars": 1,
     // ===
     "eqeqeq": 1,
-    "no-redeclare": 0,
+    "no-redeclare": 1,
     // console.xxx
     "no-console": [
       1,

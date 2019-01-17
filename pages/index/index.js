@@ -25,5 +25,8 @@ var vm = new global.VM({
   },
   mounted() {
     console.log('mounted')
+  },
+  onShow() {
+    console.log('onShow')
   }
 })

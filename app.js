@@ -1,8 +1,11 @@
 var VM = require('./mpvm.js')
 global.VM = VM
+Page.VM = function (options) {
+  return new VM(options)
+}
 global.VM.mixin({
-  onHide() {
-    console.log('mixin onHide')
+  onShow() {
+    console.log('mixin onShow')
   }
 })
 

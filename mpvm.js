@@ -17,24 +17,25 @@ function VM(options) {
   }
 
   // options.x -> this
-  for (const key in options) {
+  for (var key in options) {
     if (key === 'data' || key === 'computed' || key === 'methods') continue
+    !function (key, value) {
+      var oldValue = this[key]
+      var newValue = options[key]
 
-    var oldValue = this[key]
-    var newValue = options[key]
-
-    if (typeof oldValue === 'function') {
-      this[key] = function () {
-        oldValue.apply(this, arguments)
-        newValue.apply(this, arguments)
+      if (typeof oldValue === 'function') {
+        this[key] = function () {
+          oldValue.apply(this, arguments)
+          newValue.apply(this, arguments)
+        }
+      } else {
+        this[key] = newValue
       }
-    } else {
-      this[key] = newValue
-    }
+    }.call(this, key, options[key])
   }
 
   // computed -> this
-  for (const key in options.computed) {
+  for (var key in options.computed) {
     var fn = options.computed[key]
     this[key] = fn
     // toJSON -> $render -> !(noRender) -> setData -> toJSON
@@ -75,7 +76,7 @@ function VM(options) {
           }
 
           // bind vm, result
-          return self[key].apply(self, args)
+          return value.apply(self, args)
         }
       }
       // 
@@ -138,7 +139,7 @@ Object.assign(VM.prototype, {
     var self = this
 
     // data()
-    var data = this.$options.data
+    var data = this.$options.data || {}
     if (typeof data === 'function') {
       data = data.apply(this)
     } else {
@@ -156,7 +157,7 @@ Object.assign(VM.prototype, {
             // self.$render()
             var kv = {}
             kv[key] = data[key]
-            self.setData(kv)
+            self.setData(kv) // vm.mode .sub = value
             return data[key]
           },
           set: function (value) {
@@ -164,7 +165,7 @@ Object.assign(VM.prototype, {
             // self.$render()
             var kv = {}
             kv[key] = value
-            self.setData(kv)
+            self.setData(kv) // vm.model = value
           }
         })
       }(key, data[key])
