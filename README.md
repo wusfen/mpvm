@@ -108,6 +108,8 @@ change('my world')
 
 #### data-args
 
+多个参数
+
 ```html
 <button bind:tap="change" data-args="{{ [1,2,3] }}">change</button>
 ```
