@@ -61,7 +61,7 @@ function VM(options) {
         mpOptions[key] = function (e) {
           var args = arguments
 
-          // mp.handler(dataset.arg||e, dataset)
+          // mp.handler( dataset.arg||e, dataset )
           if (e && e.currentTarget) {
             var dataset = e.currentTarget.dataset || {}
             args = []
