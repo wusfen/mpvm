@@ -18,9 +18,9 @@ var vm = new global.VM({
     getModel() {
       return this.model
     },
-    change() {
+    change(arg) {
       console.log(arguments)
-      vm.model = 'new model'
+      vm.model = arg || 'new model'
     }
   },
   mounted() {

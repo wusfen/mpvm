@@ -67,8 +67,11 @@ function VM(options) {
             args = []
             args[0] = e
             args[1] = dataset
-            if ('e' in dataset) {
+            if ('e' in dataset) { // -- => arg
               args[0] = dataset.e
+            }
+            if ('arg' in dataset) {
+              args[0] = dataset.arg
             }
             if ('args' in dataset) {
               args = dataset.args
@@ -102,9 +105,9 @@ function VM(options) {
   Page(mpOptions)
 }
 Object.assign(VM.prototype, {
-  setData(kv) {
+  setData(kv, getSet, key) {
     if (VM.noRender) return
-    console.log('setData', kv)
+    console.log('setData', getSet || '', key || '', kv)
     var $page = this.$page
 
     // add computed
@@ -157,7 +160,7 @@ Object.assign(VM.prototype, {
             // self.$render()
             var kv = {}
             kv[key] = data[key]
-            self.setData(kv) // vm.mode .sub = value
+            self.setData(kv, 'get', key) // vm.mode .sub = value
             return data[key]
           },
           set: function (value) {
@@ -165,7 +168,7 @@ Object.assign(VM.prototype, {
             // self.$render()
             var kv = {}
             kv[key] = value
-            self.setData(kv) // vm.model = value
+            self.setData(kv, 'set', key) // vm.model = value
           }
         })
       }(key, data[key])

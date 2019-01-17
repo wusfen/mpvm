@@ -2,7 +2,9 @@
 <view>obj.key:{{obj.key}}</view>
 <view>computed:{{upper}}</view>
 <!--  -->
-<button id="{{ {id:1} }}" bind:tap="change" data-args="{{['arg1', {k:1}]}}">change</button>
+<button id="{{ {id:1} }}" bind:tap="change" data-arg="data-arg" xdata-args="{{['data-args.0', {k:1}]}}">
+  change
+</button>
 <input bindinput="$model" data-model="model" value='{{model}}'></input>
 <!--  -->
 <navigator url='/pages/sub/sub'>/pages/sub/sub</navigator>
