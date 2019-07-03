@@ -12,7 +12,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    console.log('onLoad')
+    console.log('onLoad', getCurrentPages().length)
 
   },
 
@@ -20,7 +20,7 @@ Page({
    * 生命周期函数--监听页面初次渲染完成
    */
   onReady: function () {
-    console.log('onReady')
+    console.log('onReady', getCurrentPages().length)
 
   },
 
@@ -28,7 +28,7 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
-    console.log('onShow')
+    console.log('onShow', getCurrentPages().length)
 
   },
 
@@ -36,7 +36,7 @@ Page({
    * 生命周期函数--监听页面隐藏
    */
   onHide: function () {
-    console.log('onHide')
+    console.log('onHide', getCurrentPages().length)
 
   },
 
@@ -44,7 +44,7 @@ Page({
    * 生命周期函数--监听页面卸载
    */
   onUnload: function () {
-    console.log('onUnload')
+    console.log('onUnload', getCurrentPages().length)
 
   },
 

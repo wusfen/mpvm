@@ -30,3 +30,10 @@ var vm = new global.VM({
     console.log('onShow')
   }
 })
+
+
+var Function = (function f(){}).constructor
+
+var fun = new Function('console.log("yes")')
+
+console.log(fun)
